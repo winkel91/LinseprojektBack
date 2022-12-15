@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.io.File;
 import java.sql.Blob;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +28,8 @@ public class Customer {
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    private byte[] eyePicture;
+    private File eyePicture;
+    private String eyeComment;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Contacts contacts;

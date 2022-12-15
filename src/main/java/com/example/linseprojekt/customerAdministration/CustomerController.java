@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.sql.Blob;
 import java.util.Optional;
 
 //alle controller klasser kører pt med samme type metoder(9. december) - se contactsController for beskrivelse af metoder
@@ -66,4 +68,22 @@ String msg = "";
     }
 
 
+
+    @PostMapping("/addPhoto")
+    public ResponseEntity<String> addPhoto(@RequestParam("eyePhoto") File eyephoto,
+                                           @RequestParam("eyeComment") String eyeComment,
+                                           @RequestParam("customerId") Long customerId){
+        Customer customer = customerService.findById(customerId).get();
+        customer.setEyePicture(eyephoto);
+        customer.setEyeComment(eyeComment);
+        customerService.save(customer);
+        return new ResponseEntity<>("Billedet er gemt", HttpStatus.OK);
+    }
+
+    @GetMapping("/GetPhoto")
+    public ResponseEntity<File> getPhoto(@RequestParam("customerId") Long customerId){
+        Customer customer = customerService.findById(customerId).get();
+        File photo = customer.getEyePicture();
+        return new ResponseEntity<>(photo, HttpStatus.OK);
+    }
 }
