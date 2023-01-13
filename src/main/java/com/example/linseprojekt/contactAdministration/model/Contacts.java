@@ -21,8 +21,11 @@ public class Contacts {
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference // stopper backreference, når man kalder på et objekt, der har et andet objekt som attribut, så får man ikke hele det andet objekt med
     private Strength strength;
+    private String frequency;
     private String packetType;
     private String supplier;
+    private int quantity;
+    private double price;
 
 
 
@@ -41,5 +44,20 @@ public class Contacts {
     public Contacts() {
     }
 
+    public Contacts(Strength strength, String frequency, String packetType, String supplier, int quantity, double price) {
+        this.strength = strength;
+        this.frequency = frequency;
+        this.packetType = packetType;
+        this.supplier = supplier;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public Contacts(String frequency, String packetType, String supplier, Strength strength) {
+    this.frequency = frequency;
+    this.packetType = packetType;
+    this.supplier = supplier;
+    this.strength = strength;
+    }
 }
 

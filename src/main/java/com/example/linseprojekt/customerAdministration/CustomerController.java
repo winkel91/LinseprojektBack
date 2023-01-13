@@ -1,5 +1,6 @@
 package com.example.linseprojekt.customerAdministration;
 
+import com.example.linseprojekt.controlAdministration.model.Control;
 import com.example.linseprojekt.customerAdministration.model.Customer;
 import com.example.linseprojekt.customerAdministration.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.sql.Blob;
+import java.util.Date;
 import java.util.Optional;
 
 //alle controller klasser kører pt med samme type metoder(9. december) - se contactsController for beskrivelse af metoder
@@ -17,62 +18,69 @@ public class CustomerController {
     private CustomerService customerService;
 
     @Autowired
-    public CustomerController(CustomerService customerService){
+    public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
     }
 
     @PostMapping("/createCustomer")
-    public ResponseEntity<String> createCustomer(@RequestParam("customerName") String customerName,
-                                                  @RequestParam("customerCPR") String customerCPR,
-                                                  @RequestParam("customerAddress") String customerAddress,
-                                                  @RequestParam("customerPhoneNumber")String customerPhoneNumber){
-        Customer customer = new Customer(customerName, customerCPR, customerAddress, customerPhoneNumber);
-customerService.save(customer);
-String msg = "";
-        if(customerService.save(customer)!=null)  {
-            msg="Oprettet kunde: " + customer.getCustomerName();
-        }else {
-            msg="fejl i oprettelsen af " + customer.getCustomerName();
+    public ResponseEntity<String> createCustomer(@RequestParam("customerFirstName") String firstName,
+                                                 @RequestParam("customerLastName") String lastName,
+                                                 @RequestParam("customerEmail") String customerEmail,
+                                                 @RequestParam("customerCPR") String customerCPR,
+                                                 @RequestParam("customerAddress") String customerAddress,
+                                                 @RequestParam("customerPhoneNumber") String customerPhoneNumber,
+                                                 @RequestParam("abonemmentOption") String abonemmentOption,
+                                                 @RequestParam("customerLastControl") String lastControl) {
+        String customerName = firstName+" "+lastName;
+        Boolean abonnement;
+        abonnement = abonemmentOption.equals("fuldtid");
+        Customer customer = new Customer(customerName, customerCPR, customerAddress, customerPhoneNumber, customerEmail, abonnement, lastControl);
+        customerService.save(customer);
+        String msg = "";
+        if (customerService.save(customer) != null) {
+            msg = "Oprettet kunde: " + customer.getCustomerFullName();
+        } else {
+            msg = "fejl i oprettelsen af " + customer.getCustomerFullName();
         }
         return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     @PostMapping("/editCustomerInfo")
-    public ResponseEntity<Customer> editCustomer(@RequestParam("customerIdNumber")Long customerIdNumber,
-                                               @RequestParam("customerName") String customerName,
-                                               @RequestParam("customerCPR") String customerCPR,
-                                               @RequestParam("customerAddress") String customerAddress,
-                                               @RequestParam("customerPhoneNumber")String customerPhoneNumber){
-        Customer newCustomer = new Customer(customerName,customerCPR,customerAddress,customerPhoneNumber);
+    public ResponseEntity<Customer> editCustomer(@RequestParam("customerIdNumber") Long customerIdNumber,
+                                                 @RequestParam("customerName") String customerName,
+                                                 @RequestParam("customerCPR") String customerCPR,
+                                                 @RequestParam("customerAddress") String customerAddress,
+                                                 @RequestParam("customerPhoneNumber") String customerPhoneNumber) {
+        Customer newCustomer = new Customer(customerName, customerCPR, customerAddress, customerPhoneNumber);
         Optional<Customer> oldCustomer = customerService.findById(customerIdNumber);
-        if (oldCustomer.isPresent()){
+        if (oldCustomer.isPresent()) {
             newCustomer.setCustomerId(customerIdNumber);
             customerService.save(newCustomer);
             return new ResponseEntity<>(newCustomer, HttpStatus.OK);
-        } else{
+        } else {
             return new ResponseEntity<>(newCustomer, HttpStatus.BAD_REQUEST);
         }
     }
+
     @DeleteMapping("/deleteCustomer")
-    public ResponseEntity<String> deleteCustomer(@RequestParam("customerIdNumber") Long customerIdNumber){
+    public ResponseEntity<String> deleteCustomer(@RequestParam("customerIdNumber") Long customerIdNumber) {
         String msg = "";
         Optional<Customer> customer = customerService.findById(customerIdNumber);
-        if(customer.isPresent()){
+        if (customer.isPresent()) {
             customerService.deleteById(customerIdNumber);
-            msg = "Kunde med kundenummer "+ customerIdNumber+" er slettet.";
+            msg = "Kunde med kundenummer " + customerIdNumber + " er slettet.";
             return new ResponseEntity<>(msg, HttpStatus.OK);
         } else {
-            msg = "Kunde med kundenummer "+ customerIdNumber+" kunne ikke findes.";
+            msg = "Kunde med kundenummer " + customerIdNumber + " kunne ikke findes.";
             return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
         }
     }
 
 
-
     @PostMapping("/addPhoto")
     public ResponseEntity<String> addPhoto(@RequestParam("eyePhoto") File eyephoto,
                                            @RequestParam("eyeComment") String eyeComment,
-                                           @RequestParam("customerId") Long customerId){
+                                           @RequestParam("customerId") Long customerId) {
         Customer customer = customerService.findById(customerId).get();
         customer.setEyePicture(eyephoto);
         customer.setEyeComment(eyeComment);
@@ -81,7 +89,7 @@ String msg = "";
     }
 
     @GetMapping("/GetPhoto")
-    public ResponseEntity<File> getPhoto(@RequestParam("customerId") Long customerId){
+    public ResponseEntity<File> getPhoto(@RequestParam("customerId") Long customerId) {
         Customer customer = customerService.findById(customerId).get();
         File photo = customer.getEyePicture();
         return new ResponseEntity<>(photo, HttpStatus.OK);

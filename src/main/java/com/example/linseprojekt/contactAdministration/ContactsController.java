@@ -31,6 +31,7 @@ public class ContactsController {
 
     @PostMapping("/addContacts")
     public ResponseEntity<Contacts> addContacts(@RequestParam("customerIdNumber") Long customerIdNumber,
+                                                @RequestParam("frequency") String frequency,
                                                 @RequestParam("packetType") String packetType,
                                                 @RequestParam("supplier") String supplier,
                                                 @RequestParam("radius") double radius,
@@ -40,7 +41,7 @@ public class ContactsController {
                                                 @RequestParam("axe") int axe,
                                                 @RequestParam("addition") double addition) {
         Strength strength = new Strength(radius, diameter, sphere, cylinder, axe, addition); //opretter et nyt strength objekt, ud fra de parameter der sendes fra html
-        Contacts contacts = new Contacts(packetType, supplier, strength); //opretter et nyt kontaktlinse object, ud fra parameter + det nye styrke objekt
+        Contacts contacts = new Contacts(frequency, packetType, supplier, strength); //opretter et nyt kontaktlinse object, ud fra parameter + det nye styrke objekt
         Customer customer = customerService.findById(customerIdNumber).get(); //henter den kunde, der er connected til det id der sendes i paramenteren
         customer.setContacts(contacts); //setter det nye kontaktlinse objekt, til kundens kontaktlinse attribut
             contactsService.save(contacts); //gemmer kontaktlinse objektet i databasen
